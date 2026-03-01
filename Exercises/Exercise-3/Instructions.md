@@ -48,7 +48,51 @@ Create the following tables in **dependency order** (referenced tables first). U
 **Write your CREATE TABLE statements here:**
 
 ```sql
--- books
+-- book1. Books Table
+CREATE TABLE books (
+    book_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    title VARCHAR(300) NOT NULL,
+    isbn VARCHAR(20) UNIQUE NULL,
+    publication_year INTEGER CHECK (publication_year BETWEEN 1000 AND 2100)
+);
+
+-- 2. Authors Table
+CREATE TABLE authors (
+    author_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL
+);
+
+-- 3. BookAuthors Table (Many-to-Many Relationship)
+CREATE TABLE book_authors (
+    book_id INTEGER NOT NULL REFERENCES books(book_id),
+    author_id INTEGER NOT NULL REFERENCES authors(author_id),
+    PRIMARY KEY (book_id, author_id)
+);
+
+-- 4. Members Table
+CREATE TABLE members (
+    member_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NULL
+);
+
+-- 5. Loans Table
+CREATE TABLE loans (
+    loan_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    book_id INTEGER NOT NULL REFERENCES books(book_id),
+    member_id INTEGER NOT NULL REFERENCES members(member_id),
+    loan_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    return_date DATE NULL
+);
+
+-- 6. Fines Table
+CREATE TABLE fines (
+    fine_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    loan_id INTEGER NOT NULL REFERENCES loans(loan_id),
+    amount NUMERIC(6,2) NOT NULL CHECK (amount >= 0),
+    paid BOOLEAN NOT NULL DEFAULT FALSE
+);s
 
 
 -- authors
@@ -136,7 +180,38 @@ Insert the rows below into each table. **Omit identity columns** (PostgreSQL wil
 **Write your INSERT statements here:**
 
 ```sql
--- books
+-- boo Inserting Books
+INSERT INTO books (title, isbn, publication_year) VALUES
+('The Great Novel', '978-0-00-000001-1', 2020),
+('Databases 101', '978-0-00-000002-2', 2019),
+('Web Development', NULL, 2021),
+('Algorithms', '978-0-00-000004-4', 2018);
+
+-- Inserting Authors
+INSERT INTO authors (full_name) VALUES ('Jane Smith'), ('Mika Virtanen'), ('Aino Laine');
+
+-- Inserting Book-Author Links
+INSERT INTO book_authors (book_id, author_id) VALUES (1,1), (1,2), (2,1), (2,2), (3,2), (3,3), (4,3);
+
+-- Inserting Members
+INSERT INTO members (full_name, email) VALUES 
+('Aino Laine', 'aino@library.fi'),
+('Mika Virtanen', 'mika@library.fi'),
+('Sara Niemi', NULL),
+('Olli Koski', 'olli@gmail.com');
+
+-- Inserting Loans
+INSERT INTO loans (book_id, member_id, loan_date, due_date, return_date) VALUES
+(1, 1, '2024-01-01', '2024-01-15', '2024-01-10'),
+(2, 1, '2024-02-01', '2024-02-15', NULL),
+(1, 2, '2024-01-10', '2024-01-25', '2024-01-20'),
+(3, 2, '2024-03-01', '2024-03-15', NULL),
+(2, 3, '2024-02-10', '2024-02-24', '2024-02-20'),
+(4, 4, '2024-03-10', '2024-03-24', '2024-03-20');
+
+-- Inserting Fines
+INSERT INTO fines (loan_id, amount, paid) VALUES (1, 2.00, TRUE), (3, 5.50, FALSE), (5, 10.00, TRUE), (6, 3.00, FALSE);
+ks
 
 
 -- authors
@@ -167,7 +242,9 @@ Run two queries to confirm the data is in place:
 **Write your SELECT statements here:**
 
 ```sql
--- 1. All columns from one table
+-- Verification
+SELECT * FROM books;
+SELECT * FROM members;1. All columns from one table
 
 
 -- 2. Specific columns from another table
@@ -189,6 +266,8 @@ Based on [Materials/06-SQL-fundamentals-2.md](../../Materials/06-SQL-fundamental
 *Expected: 1 row (The Great Novel).*
 
 ```sql
+Books from 2020
+SELECT * FROM books WHERE publication_year = 2020;
 
 
 ```
@@ -200,7 +279,8 @@ Based on [Materials/06-SQL-fundamentals-2.md](../../Materials/06-SQL-fundamental
 *Self-check: 2 rows (Mika Virtanen, Olli Koski).*
 
 ```sql
-
+Members whose email is not aino@library.fi
+SELECT * FROM members WHERE email != 'aino@library.fi';
 
 ```
 
@@ -266,6 +346,8 @@ Based on [Materials/06-SQL-fundamentals-2.md](../../Materials/06-SQL-fundamental
 *Self-check: 1 row (Sara Niemi).*
 
 ```sql
+Members with no email (NULL)
+SELECT * FROM members WHERE email IS NULL;
 
 
 ```
@@ -314,7 +396,8 @@ Based on [Materials/06-SQL-fundamentals-2.md](../../Materials/06-SQL-fundamental
 *Self-check: 4.*
 
 ```sql
-
+Count total books
+SELECT COUNT(*) AS book_count FROM books;
 
 ```
 
