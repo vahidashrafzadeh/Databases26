@@ -448,3 +448,4 @@ You will write your normalized schema (CREATE TABLE) and migration (INSERT...SEL
 ---
 
 _End of Exercise 4._
+-end
