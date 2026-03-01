@@ -43,7 +43,7 @@ Answer the following about the **`medal_results`** table. Use the table structur
 **A1.1** **Update anomaly** — If Mika Virtanen’s name is corrected (e.g. spelling), what must happen in this design? What goes wrong if we update only one row?
 
 _Your answer:_
-
+If Mika Virtanen’s name is corrected, it must be updated in every row where he appears. If we update only one row, the database will contain inconsistent data (some rows with the old name, some with the corrected name).
 ---
 
 **A1.2** **Insert anomaly** — We want to add a new event "Team Relay" in Cross-Country Skiing, at Mountain Resort, Zhangjiakou, before any athlete has competed in it. Can we do it with this single table? Explain briefly.
